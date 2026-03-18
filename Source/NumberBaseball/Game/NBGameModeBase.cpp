@@ -126,6 +126,7 @@ void ANBGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	SecretNumberString = GenerateSecretNumber();
+	bIsCounting = false;
 }
 void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
 {
@@ -190,6 +191,12 @@ FString ANBGameModeBase::Chance(ANBPlayerController* InChattingPlayerController)
 	ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState <ANBPlayerState>();
 	if (IsValid(NBPS) == true)
 	{
+		if (NBPS->GetCurrentGuessCount()== NBPS->GetMaxGuessCount()&&!bIsCounting)
+		{
+			// 카운트 시작
+			bIsCounting = true;
+			StartTime();
+		}
 		return  TEXT("(") + FString::FromInt(NBPS->GetCurrentGuessCount()) + TEXT(" / ") + FString::FromInt(NBPS->GetMaxGuessCount()) + TEXT(")");
 	}
 	return TEXT("");
@@ -197,6 +204,7 @@ FString ANBGameModeBase::Chance(ANBPlayerController* InChattingPlayerController)
 void ANBGameModeBase::ResetGame()
 {
 	SecretNumberString = GenerateSecretNumber();
+	bIsCounting = false;
 
 	for (const auto& NBPC : AllPlayerControllers)
 	{
@@ -206,6 +214,8 @@ void ANBGameModeBase::ResetGame()
 			NBPS->CurrentGuessCount = 0;
 		}
 	}
+	GetWorldTimerManager().ClearTimer(TimeHandler);
+	RemainingTime = 30;
 }
 void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController, int InStrikeCount)
 {
@@ -219,7 +229,7 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 				FString CombinedMessageString = NBPS->PlayerNameString + TEXT(" Golden Glove Winner!");
 				NBPC->NotificationText = FText::FromString(CombinedMessageString);
 
-				ResetGame();
+				ResetGame(); // 우승자 나옴
 			}
 		}
 	}
@@ -243,8 +253,8 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 			for (const auto& NBPC : AllPlayerControllers)
 			{
 				NBPC->NotificationText = FText::FromString(TEXT("To the next Game..."));
-				ResetGame();
 			}
+			ResetGame(); // 무승부
 		}
 	}
 }
@@ -256,5 +266,42 @@ int ANBGameModeBase::InputIndex(ANBPlayerController* InChattingPlayerController)
 		return NBPS->PlayerNameString.Len() + 2;
 	}
 	return 0;
+}
+void ANBGameModeBase::StartTime()
+{
+	// 타이머 시작
+	GetWorldTimerManager().SetTimer(
+		TimeHandler,
+		this,
+		&ANBGameModeBase::CountingTime,
+		1.f,
+		true
+	);
+}
+void ANBGameModeBase::CountingTime()
+{
+	// 시간 감소
+	if (RemainingTime <= 0)
+	{
+		// 타이머 정지
+		GetWorldTimerManager().ClearTimer(TimeHandler);
+		for (const auto& NBPC : AllPlayerControllers)
+		{
+			NBPC->NotificationText = FText::FromString(TEXT("To the next Game..."));
+		}
+		ResetGame(); // 시간 끝
+
+		return;
+	}
+
+	// 시간 감소
+	RemainingTime--;
+	//UE_LOG(LogTemp, Warning, TEXT("%d"), RemainingTime);
+	// 클라이언트 UI에 나타내기
+	ANBGameStateBase* NBGS = GetGameState<ANBGameStateBase>();
+	if (IsValid(NBGS) == true)
+	{
+		NBGS->MulticastRPCUpdateRemainingTime(RemainingTime);
+	}
 }
 #pragma endregion

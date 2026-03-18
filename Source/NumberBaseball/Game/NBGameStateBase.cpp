@@ -18,3 +18,24 @@ void ANBGameStateBase::MulticastRPCBroadcastLoginMessage_Implementation(const FS
         }
     }
 }
+
+void ANBGameStateBase::MulticastRPCUpdateRemainingTime_Implementation(int32 InRemainingTime)
+{
+    if (HasAuthority() == true) return; 
+
+    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    ANBPlayerController* NBPC = Cast<ANBPlayerController>(PC);
+    if (IsValid(NBPC) == true)
+    {
+        if (InRemainingTime == 0)
+        {
+            NBPC->TimeCountText = FText::FromString(
+                FString::Printf(TEXT(""))
+            );
+            return;
+        }
+        NBPC->TimeCountText = FText::FromString(
+            FString::Printf(TEXT("종료까지 %ds"), InRemainingTime)
+        );
+    }
+}

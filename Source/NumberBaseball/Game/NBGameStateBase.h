@@ -12,4 +12,7 @@ class NUMBERBASEBALL_API ANBGameStateBase : public AGameStateBase
 public:
 	UFUNCTION(NetMulticast,Reliable)
 	void MulticastRPCBroadcastLoginMessage(const FString& InNameString = FString(TEXT("Dump")));
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCUpdateRemainingTime(int32 InRemainingTime);
 };

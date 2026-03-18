@@ -46,4 +46,7 @@ protected:
 public:
 	UPROPERTY(Replicated,BlueprintReadOnly)
 	FText NotificationText;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	FText TimeCountText;
 };

@@ -34,8 +34,17 @@ public:
 
 	int InputIndex(ANBPlayerController* InChattingPlayerController);
 
+	void StartTime();
+
+	void CountingTime();
 protected:
 	FString SecretNumberString;
 
 	TArray<TObjectPtr<ANBPlayerController>> AllPlayerControllers;
+public:
+	bool bIsCounting;
+	FTimerHandle TimeHandler;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 RemainingTime = 30;
 };

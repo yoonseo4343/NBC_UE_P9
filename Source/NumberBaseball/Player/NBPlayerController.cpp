@@ -78,6 +78,7 @@ void ANBPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ThisClass, NotificationText);
+    DOREPLIFETIME(ThisClass, TimeCountText);
 }
 
 void ANBPlayerController::ServerRPCPrintChatMessageString_Implementation(const FString& InChatMessageString)
