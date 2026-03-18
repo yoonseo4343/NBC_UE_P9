@@ -5,7 +5,7 @@
 class NBFunctionLibrary
 {
 public:
-    static void MyPrintString(const AActor* InWorldContextActor, const FString& InString, float InTimeToDisplay = 1.f, FColor InColor = FColor::Cyan)
+    static void MyPrintString(const AActor* InWorldContextActor, const FString& InString, float InTimeToDisplay = 1.f, FColor InColor = FColor::Green)
     {
         if (IsValid(GEngine) == true && IsValid(InWorldContextActor) == true)
         {

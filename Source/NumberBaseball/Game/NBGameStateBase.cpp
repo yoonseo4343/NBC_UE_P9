@@ -12,7 +12,7 @@ void ANBGameStateBase::MulticastRPCBroadcastLoginMessage_Implementation(const FS
             ANBPlayerController* NBPC = Cast <ANBPlayerController>(PC);
             if (IsValid(NBPC) == true)
             {
-                FString NotificationString = InNameString + TEXT(" has joined the game!!");
+                FString NotificationString = InNameString + TEXT(" 입장");
                 NBPC->PrintChatMessageString(NotificationString);
             }
         }
