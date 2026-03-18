@@ -11,7 +11,7 @@ void ANBGameModeBase::OnPostLogin(AController* NewPlayer)
 	ANBPlayerController* NBPC = Cast<ANBPlayerController>(NewPlayer);
 	if (IsValid(NBPC) == true)
 	{
-		NBPC->NotificationText = FText::FromString(TEXT("Connected to the game server."));
+		NBPC->NotificationText = FText::FromString(TEXT("Participate in a Number Baseball Game"));
 
 		AllPlayerControllers.Add(NBPC);
 
@@ -55,6 +55,7 @@ FString ANBGameModeBase::GenerateSecretNumber()
 
 bool ANBGameModeBase::IsGuessNumberString(const FString& InNumberString)
 {
+	// 옳은 입력 판단
 	bool bCanPlay = false;
 
 	do {
@@ -73,7 +74,12 @@ bool ANBGameModeBase::IsGuessNumberString(const FString& InNumberString)
 				bIsUnique = false;
 				break;
 			}
-
+			// 중복 체크
+			if (UniqueDigits.Contains(C))
+			{
+				bIsUnique = false;
+				break;
+			}
 			UniqueDigits.Add(C);
 		}
 
@@ -123,8 +129,10 @@ void ANBGameModeBase::BeginPlay()
 }
 void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
 {
-	int Index = InChatMessageString.Len() - 3;
+	// 메시지에서 이름 길이 +2 부터 입력 시작
+	int Index = InputIndex(InChattingPlayerController);
 	FString GuessNumberString = InChatMessageString.RightChop(Index);
+	
 	if (IsGuessNumberString(GuessNumberString) == true)
 	{
 		// 숫자 야구 입력이 들어 왔을 경우
@@ -133,7 +141,7 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 		if (!IncreaseGuessCount(InChattingPlayerController))
 		{
 			// 기회가 없다
-			JudgeResultString = TEXT("No Chance...");
+			JudgeResultString = TEXT("다음 이닝을 기다리자");
 		}
 		else
 		{
@@ -159,7 +167,8 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 			ANBPlayerController* NBPC = *It;
 			if (IsValid(NBPC) == true)
 			{
-				NBPC->ClientRPCPrintChatMessageString(InChatMessageString);
+				FString CombineMessageString = InChatMessageString + TEXT(" -> 게임을 플레이 하려면 3자리 숫자를 입력하자!");
+				NBPC->ClientRPCPrintChatMessageString(CombineMessageString);
 			}
 		}
 	}
@@ -181,7 +190,7 @@ FString ANBGameModeBase::Chance(ANBPlayerController* InChattingPlayerController)
 	ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState <ANBPlayerState>();
 	if (IsValid(NBPS) == true)
 	{
-		return  TEXT("(") + FString::FromInt(NBPS->CurrentGuessCount) + TEXT(" / ") + FString::FromInt(NBPS->MaxGuessCount) + TEXT(")");
+		return  TEXT("(") + FString::FromInt(NBPS->GetCurrentGuessCount()) + TEXT(" / ") + FString::FromInt(NBPS->GetMaxGuessCount()) + TEXT(")");
 	}
 	return TEXT("");
 }
@@ -207,7 +216,7 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 		{
 			if (IsValid(NBPS) == true)
 			{
-				FString CombinedMessageString = NBPS->PlayerNameString + TEXT(" has won the game!");
+				FString CombinedMessageString = NBPS->PlayerNameString + TEXT(" Golden Glove Winner!");
 				NBPC->NotificationText = FText::FromString(CombinedMessageString);
 
 				ResetGame();
@@ -233,11 +242,19 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 		{
 			for (const auto& NBPC : AllPlayerControllers)
 			{
-				NBPC->NotificationText = FText::FromString(TEXT("Draw..."));
-
+				NBPC->NotificationText = FText::FromString(TEXT("To the next Game..."));
 				ResetGame();
 			}
 		}
 	}
+}
+int ANBGameModeBase::InputIndex(ANBPlayerController* InChattingPlayerController)
+{
+	ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState <ANBPlayerState>();
+	if (IsValid(NBPS) == true)
+	{
+		return NBPS->PlayerNameString.Len() + 2;
+	}
+	return 0;
 }
 #pragma endregion

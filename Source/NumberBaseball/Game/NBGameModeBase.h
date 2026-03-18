@@ -32,6 +32,8 @@ public:
 
 	void JudgeGame(ANBPlayerController* InChattingPlayerController, int InStrikeCount);
 
+	int InputIndex(ANBPlayerController* InChattingPlayerController);
+
 protected:
 	FString SecretNumberString;
 

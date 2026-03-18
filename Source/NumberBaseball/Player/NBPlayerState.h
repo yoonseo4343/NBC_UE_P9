@@ -16,6 +16,8 @@ public:
 
 	FString GetPlayerInfoString();
 
+	int32 GetCurrentGuessCount();
+	int32 GetMaxGuessCount();
 public:
 	UPROPERTY(Replicated)
 	FString PlayerNameString;

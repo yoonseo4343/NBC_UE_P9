@@ -26,3 +26,13 @@ FString ANBPlayerState::GetPlayerInfoString()
 
     return PlayerInfoString;
 }
+
+int32 ANBPlayerState::GetCurrentGuessCount()
+{
+    return CurrentGuessCount;
+}
+
+int32 ANBPlayerState::GetMaxGuessCount()
+{
+    return MaxGuessCount;
+}
